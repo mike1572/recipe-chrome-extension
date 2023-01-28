@@ -26,4 +26,7 @@ module.exports = {
     filename: "content.js",
     path: path.resolve(__dirname, "..", "extension"),
   },
+  externals: {
+    "chrome": "chrome"
+  }
 };
