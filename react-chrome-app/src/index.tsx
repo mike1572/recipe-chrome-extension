@@ -13,9 +13,10 @@ globalStyles.innerHTML = `
   top: 0;
   width: 300px;
   height: 100vh;
-  background: #ffffff;
+  background: #0d274c;
   border-right: 1px solid #c2c2c2;
   z-index: 999999999;
+  color: 'white';
   }
 `;
 document.body.appendChild(rootElement);
@@ -27,3 +28,5 @@ root.render(
     <App />
   </React.StrictMode>
 );
+
+
