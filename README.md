@@ -12,6 +12,8 @@ In addition, you will need individual API keys for:
 - Cohere NLP
 - OpenAI
 - Twilio
-These can be found on the websites. By replacing the .env file with these API keys, the program will be able to work.
+
+</br>
+These can be found on the websites. By replacing the SRC > API file with these API keys, the program will be able to work.
 
 The last thing to do is to go to Chrome and go to developer mode, and upload the extensions folder of this repo. This will upload it to the Chrome extension with all the needed dependencies.
