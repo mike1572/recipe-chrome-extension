@@ -214,6 +214,10 @@ function App() {
 
             <Box sx={{overflowY: 'auto', height: '80vh' }}>
           
+            <Typography variant="body2" sx={{fontWeight: 700,color: 'white', textAlign: 'center', mb: 3}}>
+              {recipeData?.title}
+            </Typography>
+
             <img style={{borderRadius: 15}} 
               src={foodImage}
             />
