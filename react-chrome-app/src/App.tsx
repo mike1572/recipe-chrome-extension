@@ -70,7 +70,11 @@ function App() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Authorization': `Bearer ${apiKey}`,
+        // "Access-Control-Allow-Origin": "*",
+        // "Access-Control-Allow-Methods": "DELETE, POST, GET, OPTIONS",
+        // "Access-Control-Allow-Headers":
+        // "Content-Type, Authorization, X-Requested-With"
       },
       body: JSON.stringify({
         model: 'image-alpha-001',
@@ -155,7 +159,11 @@ function App() {
         setLoading(false)
 
       })
-      .catch((err) => console.log(err))
+      .catch((err) => {
+        console.log(err)
+        setShowRecipe(true)        
+        setLoading(false)  
+      })
     })
     .catch((err) => {
       console.log(err)
@@ -221,9 +229,13 @@ function App() {
               {recipeData?.title}
             </Typography>
 
-            <img style={{borderRadius: 15}} 
-              src={foodImage}
-            />
+            {
+              foodImage !== "" && (
+                <img style={{borderRadius: 15}} 
+                  src={foodImage}
+                />
+              )
+            }
 
               <Typography variant="h6" sx={{fontWeight: 700,color: 'white', textAlign: 'center', mt: 2}}>
                 Ingredients
