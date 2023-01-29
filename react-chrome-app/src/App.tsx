@@ -11,6 +11,7 @@ import Basket from './components/Basket';
 import { API_KEY_COHERE, API_KEY_DALLE } from './APIKeys';
 import { ListItem, List, } from '@mui/material';
 import { ListItemText } from '@mui/material';
+import SendTwilio from './components/SendTwilio';
 
 interface RecipeObject {
   ingredients: string[],
@@ -26,6 +27,7 @@ function App() {
   let [showRecipe, setShowRecipe] = useState(false)
 
   let [foodImage, setFoodImage] = useState<string>('')
+  let [originalRecipe, setOriginalRecipe]= useState<string>('')
 
   let [recipeData, setRecipeData] = useState<RecipeObject>({ingredients: [], title: '', directions: []});
 
@@ -141,6 +143,7 @@ function App() {
     cohereReq(parseIngredients(ingredients))
     .then((data) => {
   
+      setOriginalRecipe(data.generations[0].text)
       let recipe = parseRecipe(data.generations[0].text)
       setRecipeData(recipe as RecipeObject)
 
@@ -255,12 +258,12 @@ function App() {
                   </ListItem>
                 ))}
               </List>
-
+              <SendTwilio originalRecipe={originalRecipe}/>
             </Box>
+    
           </Box>
         )
       }
-
     </BrowserRouter>
   );
 }
