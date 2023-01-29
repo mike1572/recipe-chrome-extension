@@ -1,7 +1,6 @@
 
 import { Box } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import logo from './logo.svg';
 
 import {Typography, Divider} from '@mui/material'
 
@@ -9,6 +8,15 @@ import { BrowserRouter } from 'react-router-dom';
 
 import Header from './components/Header';
 import Basket from './components/Basket';
+import { API_KEY_COHERE, API_KEY_DALLE } from './APIKeys';
+import { ListItem, List, } from '@mui/material';
+import { ListItemText } from '@mui/material';
+
+interface RecipeObject {
+  ingredients: string[],
+  title: string,
+  directions: string[]
+}
 
 function App() {
 
@@ -16,6 +24,94 @@ function App() {
   let [deletedItem, setDeletedItem]= useState<string>("")
   let [loading, setLoading] = useState(false)
   let [showRecipe, setShowRecipe] = useState(false)
+
+  let [foodImage, setFoodImage] = useState<string>('')
+
+  let [recipeData, setRecipeData] = useState<RecipeObject>({ingredients: [], title: '', directions: []});
+
+  let cohereReq = async (prompt: string) => {
+
+    const modelSettings = JSON.stringify({
+      model: "command-xlarge-20221108",
+      prompt,
+      max_tokens: 512,
+      temperature: 0.9,
+      k: 0,
+      p: 0.75
+    });
+    
+    let response = await fetch("https://api.cohere.ai/generate", {
+      method: "POST",
+      mode: "cors",
+      headers: {
+      Authorization: `Bearer ${API_KEY_COHERE}`,
+      "Content-Type": "application/json",
+      "Cohere-Version": "2021-11-08",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "DELETE, POST, GET, OPTIONS",
+      "Access-Control-Allow-Headers":
+      "Content-Type, Authorization, X-Requested-With"
+      },
+      body: modelSettings,
+      redirect: "follow"
+    });
+
+    const res = await response.json();
+    
+    return res;
+  };
+
+  let generateImage = async (prompt: string) => {
+    const apiKey = API_KEY_DALLE;
+
+    const response = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'image-alpha-001',
+        prompt: prompt,
+        num_images: 1,
+        size:'256x256'
+      })
+    });
+  
+    const res = await response.json();
+    return res.data;
+  }
+
+  let parseRecipe = (recipe: string) => {
+    const lines = recipe.split("\n");
+    let title = "";
+    let ingredients = [];
+    let directions = [];
+    let currentSection = null;
+    for (const line of lines) {
+      if (currentSection === null) {
+        if (line !== ''){
+          title = line;
+          currentSection = "ingredients";
+        }
+        
+      } else if (line === "Ingredients:") {
+        currentSection = "ingredients";
+      } else if (line === "Instructions:" || line === "Directions:") {
+        currentSection = "directions";
+      } else if (currentSection === "ingredients") {
+        if (line !== ''){
+          ingredients.push(line);
+        }
+        
+      } else if (currentSection === "directions") {
+        if (line !== ''){
+          directions.push(line);
+        }
+      }
+    }
+    return { title, ingredients, directions };
+  }
 
   let parseIngredients = (ingredients: string[]) => {
     let message = "Give me a recipe that uses ";
@@ -36,21 +132,31 @@ function App() {
 
     setLoading(true)
 
-
     if (ingredients.length === 0 ){
       alert("Make sure the list is not empty")
       setLoading(false)
       return;
     }
 
-    setTimeout(() => {
+    cohereReq(parseIngredients(ingredients))
+    .then((data) => {
+  
+      let recipe = parseRecipe(data.generations[0].text)
+      setRecipeData(recipe as RecipeObject)
 
-      setLoading(false)
-      setShowRecipe(true)
-      console.log(parseIngredients(ingredients))
+      generateImage(recipe.title)
+      .then((res) => {
 
-    },2000)
+        setFoodImage(res[0].url)
+        setShowRecipe(true)        
+        setLoading(false)
 
+      })
+      .catch((err) => console.log(err))
+    })
+    .catch((err) => {
+      console.log(err)
+    })
 
   }
 
@@ -63,8 +169,6 @@ function App() {
     } else {
       setIngredients(existingIngredients)
     }
-
-    console.log(process.env.API_KEY_COHERE)
     
   }, [])
 
@@ -102,11 +206,57 @@ function App() {
           </Box>
 
         ): (
-          <h1>recipe</h1>
+          <Box sx={{textAlign: 'center'}}>
+
+            <Typography variant='h6' sx={{my: 3, color: 'white', fontWeight: 700}}>
+              Suggested Recipe
+            </Typography>
+
+            <Box sx={{overflowY: 'auto', height: '80vh' }}>
+          
+            <img style={{borderRadius: 15}} 
+              src={foodImage}
+            />
+
+              <Typography variant="h6" sx={{fontWeight: 700,color: 'white', textAlign: 'center', mt: 2}}>
+                Ingredients
+              </Typography>
+
+              <List>
+                {recipeData?.ingredients.map((element , i) => (
+                  <ListItem key={i} sx={{p: 0}}>
+                    <ListItemText primary={
+                      <Typography sx={{color: 'white', textAlign: 'justify', mx: 2}}>
+                        {element} 
+                      </Typography>
+                    }/>
+                  </ListItem>
+                ))}
+              </List>
+              
+              <Divider sx={{borderBottom: 'solid 1px white', my: 2}}/>
+              
+              <Typography variant="h6" sx={{fontWeight: 700,color: 'white', textAlign: 'center'}}>
+                Directions
+              </Typography>
+
+              <List sx={{mb: 3}}>
+                {recipeData?.directions.map((element , i) => (
+                  <ListItem key={i} sx={{p: 0}}>
+                    <ListItemText primary={
+                      <Typography sx={{color: 'white', textAlign: 'justify', mx: 2}}>
+                        {element} 
+                      </Typography>
+                    }/>
+                  </ListItem>
+                ))}
+              </List>
+
+            </Box>
+          </Box>
         )
       }
 
-      
     </BrowserRouter>
   );
 }

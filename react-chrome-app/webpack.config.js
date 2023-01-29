@@ -1,5 +1,5 @@
 const path = require("path");
-const { config } = require('dotenv-webpack');
+
 module.exports = {
   entry: "./src/index.tsx",
   mode: "production",
@@ -17,6 +17,13 @@ module.exports = {
         ],
         exclude: /node_modules/,
       },
+      {
+        test: /\.css$/,
+        use: [
+            'style-loader',
+            'css-loader'
+        ]
+      }
     ],
   },
   resolve: {
@@ -29,9 +36,6 @@ module.exports = {
     filename: "content.js",
     path: path.resolve(__dirname, "..", "extension"),
   },
-  plugins: [
-    new config()
-  ],
   externals: {
     "chrome": "chrome"
   }

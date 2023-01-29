@@ -1,5 +1,4 @@
 
-
 import {
     Typography,
     Box,
@@ -23,10 +22,7 @@ interface BasketProps {
 
 export default function Basket ({ingredients, setIngredients, setDeletedItem, handleGenerateRecipe, loading}: BasketProps) {
 
-
     const handleDelete = (ingredient: string) => {
-
-        console.log(ingredient)
         setDeletedItem(ingredient)
         const existingIngredients = JSON.parse(localStorage.getItem('ingredients')!) as string[];
         let items = existingIngredients.filter(item => item !== ingredient)
@@ -47,6 +43,7 @@ export default function Basket ({ingredients, setIngredients, setDeletedItem, ha
                 {
                     ingredients.map((ingredient,i) => (
                         <ListItem
+                            key={i}
                             secondaryAction={
                                 <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(ingredient)}>
                                     <DeleteIcon sx={{color: 'white'}} />
