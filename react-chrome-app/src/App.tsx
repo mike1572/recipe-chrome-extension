@@ -1,3 +1,4 @@
+
 import { Box } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import logo from './logo.svg';
@@ -63,6 +64,8 @@ function App() {
       setIngredients(existingIngredients)
     }
 
+    console.log(process.env.API_KEY_COHERE)
+    
   }, [])
 
   return (

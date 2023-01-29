@@ -13,6 +13,7 @@
 
 #
 .env
+/src/APIKeys.tsx
 
 # misc
 .DS_Store
